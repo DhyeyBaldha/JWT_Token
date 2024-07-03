@@ -1,9 +1,11 @@
 package com.example3.SpringJWT.Service;
 
 import com.example3.SpringJWT.Entity.User;
+import com.example3.SpringJWT.Exception.UserAlreadyExistsException;
 import com.example3.SpringJWT.Repository.UserRepository;
 import com.example3.SpringJWT.auth.AuthenticationResponse;
 import lombok.RequiredArgsConstructor;
+import lombok.SneakyThrows;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
@@ -22,6 +24,11 @@ public class AuthenticationService {
     private final AuthenticationManager authenticationManager;
 
     public AuthenticationResponse register(User request){
+        Optional<User> existingUser = repository.findByUsername(request.getUsername());
+        if(existingUser.isPresent()){
+            throw new UserAlreadyExistsException("User already exists with username: " + request.getUsername());
+        }
+
         User user = new User();
         user.setFirstname(request.getFirstname());
         user.setLastname(request.getLastname());
